@@ -99,7 +99,10 @@ do
   vim.g.maplocalleader = ' '
 
   -- Set to true if you have a Nerd Font installed and selected in the terminal
-  vim.g.have_nerd_font = false
+  vim.g.have_nerd_font = true
+
+  -- Disable unused providers to silence checkhealth warnings
+  vim.g.loaded_python3_provider = 0
 
   -- [[ Setting options ]]
   --  See `:help vim.o`
@@ -110,7 +113,7 @@ do
   vim.o.number = true
   -- You can also add relative line numbers, to help with jumping.
   --  Experiment for yourself to see if you like it!
-  -- vim.o.relativenumber = true
+  vim.o.relativenumber = true
 
   -- Enable mouse mode, can be useful for resizing splits for example!
   vim.o.mouse = 'a'
@@ -350,15 +353,43 @@ do
   --
   -- See `:help gitsigns` to understand what each configuration key does.
   -- Adds git related signs to the gutter, as well as utilities for managing changes
+
+  -- Commented the original gitsigns config, replaced with the block below
+  --
+  -- vim.pack.add { gh 'lewis6991/gitsigns.nvim' }
+  -- require('gitsigns').setup {
+  --   signs = {
+  --     add = { text = '+' }, ---@diagnostic disable-line: missing-fields
+  --     change = { text = '~' }, ---@diagnostic disable-line: missing-fields
+  --     delete = { text = '_' }, ---@diagnostic disable-line: missing-fields
+  --     topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
+  --     changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
+  --   },
+  -- }
+
   vim.pack.add { gh 'lewis6991/gitsigns.nvim' }
   require('gitsigns').setup {
     signs = {
-      add = { text = '+' }, ---@diagnostic disable-line: missing-fields
-      change = { text = '~' }, ---@diagnostic disable-line: missing-fields
-      delete = { text = '_' }, ---@diagnostic disable-line: missing-fields
-      topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
-      changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
+      add = { text = '+' },
+      change = { text = '~' },
+      delete = { text = '_' },
+      topdelete = { text = '‾' },
+      changedelete = { text = '~' },
     },
+    current_line_blame = true,
+    on_attach = function(bufnr)
+      local gs = package.loaded.gitsigns
+      local function map(mode, l, r, desc) vim.keymap.set(mode, l, r, { buffer = bufnr, desc = desc }) end
+
+      map('n', ']h', function() gs.nav_hunk('next') end, 'Next [H]unk')
+      map('n', '[h', function() gs.nav_hunk('prev') end, 'Prev [H]unk')
+      map('n', '<leader>hs', gs.stage_hunk, '[H]unk [S]tage')
+      map('n', '<leader>hr', gs.reset_hunk, '[H]unk [R]eset')
+      map('v', '<leader>hs', function() gs.stage_hunk { vim.fn.line('.'), vim.fn.line('v') } end, '[H]unk [S]tage')
+      map('v', '<leader>hr', function() gs.reset_hunk { vim.fn.line('.'), vim.fn.line('v') } end, '[H]unk [R]eset')
+      map('n', '<leader>hp', gs.preview_hunk, '[H]unk [P]review')
+      map('n', '<leader>hb', gs.blame_line, '[H]unk [B]lame line')
+    end,
   }
 
   -- Useful plugin to show you pending keybinds.
@@ -371,7 +402,8 @@ do
     spec = {
       { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
       { '<leader>t', group = '[T]oggle' },
-      { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
+      { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+      { '<leader>g', group = '[G]it'},
       { 'gr', group = 'LSP Actions', mode = { 'n' } },
     },
   }
@@ -978,6 +1010,60 @@ do
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   -- require 'custom.plugins'
 end
+
+-- ============================================================
+-- SECTION 11: My custom plugins 
+-- ============================================================
+do
+
+  --
+  -- Neo-tree - the file explore sidebar
+  --
+  vim.pack.add { gh 'nvim-neo-tree/neo-tree.nvim' }
+  -- neo-tree requires these dependencies
+  vim.pack.add { gh 'nvim-lua/plenary.nvim' }
+  vim.pack.add { gh 'MunifTanjim/nui.nvim' }
+  vim.pack.add { gh 'nvim-tree/nvim-web-devicons' }
+
+  require('neo-tree').setup {
+    -- your config here
+  }
+
+  vim.keymap.set('n', '<leader>e', '<cmd>Neotree toggle<CR>', { desc = 'Toggle [E]xplorer' })
+
+  --
+  -- Render Markdown
+  --
+  vim.pack.add({
+    'https://github.com/nvim-treesitter/nvim-treesitter',
+    'https://github.com/nvim-mini/mini.nvim',            -- if you use the mini.nvim suite
+    -- 'https://github.com/nvim-mini/mini.icons',        -- if you use standalone mini plugins
+    -- 'https://github.com/nvim-tree/nvim-web-devicons', -- if you prefer nvim-web-devicons
+    'https://github.com/MeanderingProgrammer/render-markdown.nvim',
+  })
+  require('render-markdown').setup({}) -- only mandatory if you want to set custom options
+
+  --
+  -- diffView - For better git diff viewing
+  --
+  vim.pack.add { gh 'sindrets/diffview.nvim' }
+  require('diffview').setup {}
+
+  --
+  -- diffView - For better git diff viewing
+  --
+  vim.pack.add { gh 'NeogitOrg/neogit' }
+  require('neogit').setup {
+    integrations = { diffview = true },
+  }
+
+  vim.keymap.set('n', '<leader>gg', '<cmd>Neogit<CR>', { desc = '[G]it status' })
+  vim.keymap.set('n', '<leader>gd', '<cmd>DiffviewOpen<CR>', { desc = '[G]it [D]iff (working tree)' })
+  vim.keymap.set('n', '<leader>gh', '<cmd>DiffviewFileHistory %<CR>', { desc = '[G]it file [H]istory' })
+  vim.keymap.set('n', '<leader>gc', '<cmd>DiffviewClose<CR>', { desc = '[G]it diff [C]lose' })
+
+end
+
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
