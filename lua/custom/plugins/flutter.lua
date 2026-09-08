@@ -76,6 +76,9 @@ vim.api.nvim_create_autocmd('FileType', {
     map('<leader>Fl', '<cmd>FlutterLogClear<cr>',      'Flutter: clear log')
     map('<leader>FL', '<cmd>FlutterLspRestart<cr>',    'Flutter: restart LSP')
 
+    -- special map that allow us to run flutter with web server inside devbox
+    map('<leader>FW', '<cmd>FlutterRun -d web-server --web-hostname=0.0.0.0 --web-port=8080<cr>', 'Flutter: run (web-server)')
+
     -- buffer-local which-key group label (safe if which-key isn't loaded)
     local ok, wk = pcall(require, 'which-key')
     if ok then wk.add { { '<leader>F', group = 'Flutter', buffer = ev.buf } } end
