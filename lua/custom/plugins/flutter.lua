@@ -40,7 +40,6 @@ require('flutter-tools').setup {
   closing_tags = { enabled = true, highlight = 'Comment', prefix = '// ' },
   dev_log = { enabled = true, open_cmd = 'tabedit' },
   lsp = {
-    color = { enabled = true, background = true },
     settings = {
       showTodos = true,
       renameFilesWithClasses = 'prompt',
@@ -48,3 +47,12 @@ require('flutter-tools').setup {
     },
   },
 }
+
+-- Neovim 0.12 handles document colors natively; flutter-tools' `lsp.color` is deprecated
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('flutter-document-color', { clear = true }),
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client and client.name == 'dartls' then vim.lsp.document_color.enable(true, { bufnr = args.buf }) end
+  end,
+})
