@@ -55,3 +55,29 @@ vim.api.nvim_create_autocmd('LspAttach', {
     if client and client.name == 'dartls' then vim.lsp.document_color.enable(true, { bufnr = args.buf }) end
   end,
 })
+
+-- Register <leader>F to trigger flutter-tools
+vim.api.nvim_create_autocmd('FileType', {
+  group = vim.api.nvim_create_augroup('flutter-keymaps', { clear = true }),
+  pattern = 'dart',
+  callback = function(ev)
+    local map = function(lhs, rhs, desc)
+      vim.keymap.set('n', lhs, rhs, { buffer = ev.buf, desc = desc })
+    end
+
+    map('<leader>Fr', '<cmd>FlutterRun<cr>',           'Flutter: run')
+    map('<leader>Fq', '<cmd>FlutterQuit<cr>',          'Flutter: quit')
+    map('<leader>Fh', '<cmd>FlutterReload<cr>',        'Flutter: hot reload')
+    map('<leader>FR', '<cmd>FlutterRestart<cr>',       'Flutter: hot restart')
+    map('<leader>Fd', '<cmd>FlutterDevices<cr>',       'Flutter: devices')
+    map('<leader>Fe', '<cmd>FlutterEmulators<cr>',     'Flutter: emulators')
+    map('<leader>Fo', '<cmd>FlutterOutlineToggle<cr>', 'Flutter: outline')
+    map('<leader>FD', '<cmd>FlutterDevTools<cr>',      'Flutter: DevTools')
+    map('<leader>Fl', '<cmd>FlutterLogClear<cr>',      'Flutter: clear log')
+    map('<leader>FL', '<cmd>FlutterLspRestart<cr>',    'Flutter: restart LSP')
+
+    -- buffer-local which-key group label (safe if which-key isn't loaded)
+    local ok, wk = pcall(require, 'which-key')
+    if ok then wk.add { { '<leader>F', group = 'Flutter', buffer = ev.buf } } end
+  end,
+})
