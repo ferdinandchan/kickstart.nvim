@@ -35,7 +35,6 @@ vim.pack.add {
 }
 
 require('flutter-tools').setup {
-  flutter_path = vim.fn.expand '~/sdks/flutter/bin/flutter',
   widget_guides = { enabled = true },
   closing_tags = { enabled = true, highlight = 'Comment', prefix = '// ' },
   dev_log = { enabled = true, open_cmd = 'tabedit' },
