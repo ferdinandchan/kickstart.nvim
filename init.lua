@@ -130,6 +130,12 @@ do
   -- Enable break indent
   vim.o.breakindent = true
 
+  -- Use two spaces for indentation, never hard tabs 
+  vim.o.expandtab = true
+  vim.o.shiftwidth = 2
+  vim.o.tabstop = 2
+  vim.o.softtabstop = 2
+
   -- Enable undo/redo changes even after closing and reopening a file
   vim.o.undofile = true
 
@@ -752,13 +758,23 @@ do
           },
           workspace = {
             checkThirdParty = false,
+
             -- NOTE: this is a lot slower and will cause issues when working on your own configuration.
             --  See https://github.com/neovim/nvim-lspconfig/issues/3189
-            library = vim.tbl_extend('force', vim.api.nvim_get_runtime_file('', true), {
+
+            -- commented based on suggestion from Claude
+            --library = vim.tbl_extend('force', vim.api.nvim_get_runtime_file('', true), {
+            --  '${3rd}/luv/library',
+            --  '${3rd}/busted/library',
+            --}),
+
+            -- and replaced with the follow suggestion from Claude
+            library = {
+              vim.env.VIMRUNTIME,
               '${3rd}/luv/library',
-              '${3rd}/busted/library',
-            }),
+            },
           },
+          diagnostics = { globals = { 'vim' } },
         })
       end,
       ---@type lspconfig.settings.lua_ls
@@ -936,7 +952,7 @@ do
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
   -- Ensure basic parsers are installed
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+  local parsers = { 'bash', 'c', 'dart', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'ron', 'rust', 'toml', 'vim', 'vimdoc' }
   require('nvim-treesitter').install(parsers)
 
   ---@param buf integer
@@ -998,7 +1014,7 @@ do
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug'
+  require 'kickstart.plugins.debug'
   -- require 'kickstart.plugins.indent_line'
   -- require 'kickstart.plugins.lint'
   -- require 'kickstart.plugins.autopairs'
@@ -1008,7 +1024,7 @@ do
   -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- require 'custom.plugins'
+  require 'custom.plugins'
 end
 
 -- ============================================================
@@ -1019,83 +1035,132 @@ do
   --
   -- Neo-tree - the file explore sidebar
   --
-  vim.pack.add { gh 'nvim-neo-tree/neo-tree.nvim' }
-  -- neo-tree requires these dependencies
-  vim.pack.add { gh 'nvim-lua/plenary.nvim' }
-  vim.pack.add { gh 'MunifTanjim/nui.nvim' }
-  vim.pack.add { gh 'nvim-tree/nvim-web-devicons' }
+  -- vim.pack.add { gh 'nvim-neo-tree/neo-tree.nvim' }
+  -- -- neo-tree requires these dependencies
+  -- vim.pack.add { gh 'nvim-lua/plenary.nvim' }
+  -- vim.pack.add { gh 'MunifTanjim/nui.nvim' }
+  -- vim.pack.add { gh 'nvim-tree/nvim-web-devicons' }
+  --
+  -- require('neo-tree').setup {
+  --   -- your config here
+  -- }
+  --
+  -- vim.keymap.set('n', '<leader>e', '<cmd>Neotree toggle<CR>', { desc = 'Toggle [E]xplorer' })
+  --
 
-  require('neo-tree').setup {
-    -- your config here
-  }
-
-  vim.keymap.set('n', '<leader>e', '<cmd>Neotree toggle<CR>', { desc = 'Toggle [E]xplorer' })
 
   --
   -- Render Markdown
   --
-  vim.pack.add({
-    'https://github.com/nvim-treesitter/nvim-treesitter',
-    'https://github.com/nvim-mini/mini.nvim',            -- if you use the mini.nvim suite
-    -- 'https://github.com/nvim-mini/mini.icons',        -- if you use standalone mini plugins
-    -- 'https://github.com/nvim-tree/nvim-web-devicons', -- if you prefer nvim-web-devicons
-    'https://github.com/MeanderingProgrammer/render-markdown.nvim',
-  })
-  require('render-markdown').setup({}) -- only mandatory if you want to set custom options
+  -- vim.pack.add({
+  --   'https://github.com/nvim-treesitter/nvim-treesitter',
+  --   'https://github.com/nvim-mini/mini.nvim',            -- if you use the mini.nvim suite
+  --   -- 'https://github.com/nvim-mini/mini.icons',        -- if you use standalone mini plugins
+  --   -- 'https://github.com/nvim-tree/nvim-web-devicons', -- if you prefer nvim-web-devicons
+  --   'https://github.com/MeanderingProgrammer/render-markdown.nvim',
+  -- })
+  -- require('render-markdown').setup({}) -- only mandatory if you want to set custom options
+
 
   --
   -- diffView - For better git diff viewing
   --
-  vim.pack.add { gh 'sindrets/diffview.nvim' }
-  require('diffview').setup {}
-
+  -- vim.pack.add { gh 'sindrets/diffview.nvim' }
+  -- require('diffview').setup {}
   --
-  -- diffView - For better git diff viewing
+  -- --
+  -- -- diffView - For better git diff viewing
+  -- --
+  -- vim.pack.add { gh 'NeogitOrg/neogit' }
+  -- require('neogit').setup {
+  --   integrations = { diffview = true },
+  -- }
   --
-  vim.pack.add { gh 'NeogitOrg/neogit' }
-  require('neogit').setup {
-    integrations = { diffview = true },
-  }
-
-  vim.keymap.set('n', '<leader>gg', '<cmd>Neogit<CR>', { desc = '[G]it status' })
-  vim.keymap.set('n', '<leader>gd', '<cmd>DiffviewOpen<CR>', { desc = '[G]it [D]iff (working tree)' })
-  vim.keymap.set('n', '<leader>gh', '<cmd>DiffviewFileHistory %<CR>', { desc = '[G]it file [H]istory' })
-  vim.keymap.set('n', '<leader>gc', '<cmd>DiffviewClose<CR>', { desc = '[G]it diff [C]lose' })
+  -- vim.keymap.set('n', '<leader>gg', '<cmd>Neogit<CR>', { desc = '[G]it status' })
+  -- vim.keymap.set('n', '<leader>gd', '<cmd>DiffviewOpen<CR>', { desc = '[G]it [D]iff (working tree)' })
+  -- vim.keymap.set('n', '<leader>gh', '<cmd>DiffviewFileHistory %<CR>', { desc = '[G]it file [H]istory' })
+  -- vim.keymap.set('n', '<leader>gc', '<cmd>DiffviewClose<CR>', { desc = '[G]it diff [C]lose' })
 
   --
   -- Flutter and Dart
   --
 
   -- Flutter icons
-  vim.pack.add { gh 'folke/snacks.nvim' }
-  vim.pack.add { gh 'sidlatau/flutter-icons.nvim' }
-  -- snacks: the image module must be enabled
-  require("snacks").setup({ image = { enabled = true } })
-
-  require("flutter-icons").setup({
-    builtin_icons = true,   -- also render Icons.* (not just Symbols.*)
-    -- color = nil,            -- "#rrggbb"; nil follows the Normal fg
-    -- png_size = 64,          -- source PNG px (display is one text row)
-    -- virtual_text = true,    -- auto-enable inline icons in Dart source
-  })
-
-  -- register the completion-doc provider with blink
-  require("blink.cmp").setup({
-    sources = {
-      transform_items = require("flutter-icons").transform_items,
-    },
-  })
+  -- vim.pack.add { gh 'folke/snacks.nvim' }
+  -- vim.pack.add { gh 'sidlatau/flutter-icons.nvim' }
+  -- -- snacks: the image module must be enabled
+  -- require("snacks").setup({ image = { enabled = true } })
+  --
+  -- require("flutter-icons").setup({
+  --   builtin_icons = true,   -- also render Icons.* (not just Symbols.*)
+  --   -- color = nil,            -- "#rrggbb"; nil follows the Normal fg
+  --   -- png_size = 64,          -- source PNG px (display is one text row)
+  --   -- virtual_text = true,    -- auto-enable inline icons in Dart source
+  -- })
+  --
+  -- -- register the completion-doc provider with blink
+  -- require("blink.cmp").setup({
+  --   sources = {
+  --     transform_items = require("flutter-icons").transform_items,
+  --   },
+  -- })
+  --
+  -- --
+  -- -- Flutter tools
+  -- --
+  -- vim.pack.add {
+  --   gh 'nvim-lua/plenary.nvim',
+  --   gh 'stevearc/dressing.nvim', -- optional for vim.ui.select
+  --   gh 'nvim-flutter/flutter-tools.nvim',
+  -- }
+  --
+  -- require('flutter-tools').setup {
+  --   flutter_path = vim.fn.expand '~/sdks/flutter/bin/flutter',
+  --   widget_guides = { enabled = true },
+  --   closing_tags = { enabled = true, highlight = 'Comment', prefix = '// ' },
+  --   dev_log = { enabled = true, open_cmd = 'tabedit' },
+  --   lsp = {
+  --     color = { enabled = true, background = true },
+  --     settings = {
+  --       showTodos = true,
+  --       renameFilesWithClasses = 'prompt',
+  --       updateImportsOnRename = true,
+  --     },
+  --   },
+  -- }
 
   --
-  -- Flutter tools
+  -- Rust
   --
-  vim.pack.add {
-    gh 'nvim-lua/plenary.nvim',
-    gh 'stevearc/dressing.nvim', -- optional for vim.ui.select
-    gh 'nvim-flutter/flutter-tools.nvim',
-  }
-
-  require('flutter-tools').setup {}
+  -- NOTE: rustaceanvim configures and starts `rust-analyzer` itself, so do NOT
+  -- also add `rust_analyzer` to the `servers` table in SECTION 6 -- that would
+  -- attach two clients to every Rust buffer.
+  --
+  -- `rust-analyzer` itself comes from rustup, not Mason, so that it always
+  -- matches the active toolchain:
+  --    rustup component add rust-analyzer clippy rust-src
+  --
+  -- rustaceanvim has no `setup()`; it reads `vim.g.rustaceanvim`, which must be
+  -- set before the plugin loads.
+  -- vim.g.rustaceanvim = {
+  --   server = {
+  --     default_settings = {
+  --       ['rust-analyzer'] = {
+  --         cargo = { allFeatures = true },
+  --         checkOnSave = true,
+  --         check = { command = 'clippy' },
+  --         inlayHints = { lifetimeElisionHints = { enable = 'skip_trivial' } },
+  --       },
+  --     },
+  --   },
+  -- }
+  -- vim.pack.add { { src = gh 'mrcjkb/rustaceanvim', version = vim.version.range '6.*' } }
+  --
+  -- -- Version info and completion inside `Cargo.toml`
+  -- vim.pack.add { gh 'Saecki/crates.nvim' }
+  -- require('crates').setup {
+  --   completion = { crates = { enabled = true } },
+  -- }
 end
 
 
