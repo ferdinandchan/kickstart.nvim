@@ -732,7 +732,6 @@ do
   local servers = {
     -- clangd = {},
     -- gopls = {},
-    -- pyright = {},
     -- rust_analyzer = {},
     --
     -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -740,6 +739,9 @@ do
     --
     -- But for many setups, the LSP (`ts_ls`) will work just fine
     -- ts_ls = {},
+
+    -- Python
+    basedpyright = {},
 
     -- Special Lua Config, as recommended by neovim help docs
     lua_ls = {
