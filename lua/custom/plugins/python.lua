@@ -8,7 +8,7 @@ local gh = utils.gh
 -- basedpyright (types, hover, go-to) is set up in init.lua SECTION 6. ruff
 -- runs beside it for linting, fixes and formatting. Tests: neotest-python,
 -- in zz-neotest.lua.
-utils.mason_install { 'ruff', 'debugpy' }
+vim.list_extend(utils.mason_tools, { 'ruff', 'debugpy' })
 
 vim.lsp.config('ruff', {
   -- leave hover to basedpyright, so K doesn't show two popups

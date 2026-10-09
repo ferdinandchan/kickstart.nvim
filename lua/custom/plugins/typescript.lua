@@ -8,7 +8,7 @@ local gh = utils.gh
 -- LSP: vtsls (a wrapper around VS Code's TypeScript extension). Formatting:
 -- prettierd, or the project's own prettier. Tests: neotest-vitest, registered
 -- in zz-neotest.lua. TypeScript itself comes from the project's node_modules.
-utils.mason_install { 'vtsls', 'prettierd' }
+vim.list_extend(utils.mason_tools, { 'vtsls', 'prettierd' })
 
 vim.lsp.enable 'vtsls'
 

@@ -8,7 +8,7 @@ local utils = require 'custom.utils'
 -- Gradle projects itself, so open nvim from the directory with
 -- settings.gradle.kts. Formatting: ktlint. No neotest adapter; run
 -- `./gradlew test` instead.
-utils.mason_install { 'kotlin-lsp', 'ktlint' }
+vim.list_extend(utils.mason_tools, { 'kotlin_lsp', 'ktlint' })
 
 vim.lsp.enable 'kotlin_lsp'
 

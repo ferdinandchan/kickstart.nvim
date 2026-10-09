@@ -805,13 +805,16 @@ do
   --    :Mason
   --
   -- You can press `g?` for help in this menu.
-  local ensure_installed = vim.tbl_keys(servers or {})
+  --
+  -- The list is shared: language files in `custom/plugins/` add their own tools
+  -- to it, and mason-tool-installer is set up with all of them in SECTION 10,
+  -- after those files have loaded.
+  local ensure_installed = require('custom.utils').mason_tools
+  vim.list_extend(ensure_installed, vim.tbl_keys(servers or {}))
   vim.list_extend(ensure_installed, {
     -- You can add other tools here that you want Mason to install
     'stylua', -- Used to format Lua code
   })
-
-  require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
   for name, server in pairs(servers) do
     vim.lsp.config(name, server)
@@ -1027,6 +1030,10 @@ do
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   require 'custom.plugins'
+
+  -- Install the Mason tools from SECTION 6 plus those the custom plugin files
+  -- added. Installs start on VimEnter, so this only needs to run before then.
+  require('mason-tool-installer').setup { ensure_installed = require('custom.utils').mason_tools }
 end
 
 -- ============================================================
