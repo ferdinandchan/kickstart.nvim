@@ -3,7 +3,11 @@
 --
 
 -- import the GH helper
-local gh = require('custom.utils').gh
+local utils = require 'custom.utils'
+local gh = utils.gh
+
+-- Dart debug adapter, kept in the Mason tool list
+vim.list_extend(utils.mason_tools, { 'dart-debug-adapter' })
 
 -- Flutter icons
 vim.pack.add { gh 'folke/snacks.nvim' }

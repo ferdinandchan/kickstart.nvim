@@ -1,5 +1,6 @@
 -- import the GH helper
-local gh = require('custom.utils').gh
+local utils = require 'custom.utils'
+local gh = utils.gh
 
 --
 -- Rust
@@ -27,6 +28,9 @@ vim.g.rustaceanvim = {
   },
 }
 vim.pack.add { { src = gh 'mrcjkb/rustaceanvim', version = vim.version.range '6.*' } }
+
+-- Debugger; rustaceanvim finds it in Mason on its own
+vim.list_extend(utils.mason_tools, { 'codelldb' })
 
 -- rustfmt also comes from rustup
 require('conform').formatters_by_ft.rust = { 'rustfmt' }

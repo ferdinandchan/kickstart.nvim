@@ -814,6 +814,7 @@ do
   vim.list_extend(ensure_installed, {
     -- You can add other tools here that you want Mason to install
     'stylua', -- Used to format Lua code
+    'ast-grep', -- Structural search and rewrite (`sg`)
   })
 
   for name, server in pairs(servers) do
