@@ -1,6 +1,6 @@
 -- Central Neotest config.
--- Named `zz-` so it loads AFTER rust.lua/flutter.lua and their plugins
--- (rustaceanvim, flutter-tools) are on the runtimepath.
+-- Named `zz-` so it loads AFTER rust.lua/flutter.lua/typescript.lua and their
+-- plugins (rustaceanvim, flutter-tools, neotest-vitest) are on the runtimepath.
 
 local gh = require('custom.utils').gh
 
@@ -31,6 +31,14 @@ else
   vim.notify('neotest: rustaceanvim not loaded, Rust tests disabled', vim.log.levels.WARN)
 end
 
+-- neotest-vitest is added by typescript.lua
+local ok_vitest, vitest_adapter = pcall(require, 'neotest-vitest')
+if ok_vitest then
+  table.insert(adapters, vitest_adapter)
+else
+  vim.notify('neotest: neotest-vitest not loaded, TypeScript tests disabled', vim.log.levels.WARN)
+end
+
 require('neotest').setup {
   adapters = adapters,
   quickfix = { enabled = false },
@@ -40,7 +48,7 @@ require('neotest').setup {
 -- Keymaps, active in buffers these adapters support
 vim.api.nvim_create_autocmd('FileType', {
   group = vim.api.nvim_create_augroup('neotest-keymaps', { clear = true }),
-  pattern = { 'dart', 'rust', 'python' },
+  pattern = { 'dart', 'rust', 'python', 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
   callback = function(ev)
     local nt = require 'neotest'
     local map = function(lhs, rhs, desc)

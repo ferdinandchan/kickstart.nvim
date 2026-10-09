@@ -28,6 +28,9 @@ vim.g.rustaceanvim = {
 }
 vim.pack.add { { src = gh 'mrcjkb/rustaceanvim', version = vim.version.range '6.*' } }
 
+-- rustfmt also comes from rustup
+require('conform').formatters_by_ft.rust = { 'rustfmt' }
+
 -- Version info and completion inside `Cargo.toml`
 vim.pack.add { gh 'Saecki/crates.nvim' }
 require('crates').setup {
