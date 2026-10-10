@@ -121,6 +121,31 @@ do
   -- Don't show the mode, since it's already in the status line
   vim.o.showmode = false
 
+  -- In the devbox container there is no system clipboard to talk to, so yanks
+  -- go to the macOS clipboard as OSC 52 escape sequences, through tmux
+  -- (`set-clipboard on`) and Ghostty. Pasting does not read the clipboard
+  -- back over OSC 52: terminals answer slowly or ask permission each time,
+  -- so `p` pastes the last yank and Cmd+V pastes from macOS.
+  if vim.env.CONTAINER_DEVBOX then
+    local osc52 = require 'vim.ui.clipboard.osc52'
+    local last_yank = {}
+    local function copy(reg)
+      local send = osc52.copy(reg)
+      return function(lines, regtype)
+        last_yank[reg] = { lines, regtype }
+        send(lines)
+      end
+    end
+    local function paste(reg)
+      return function() return last_yank[reg] or { { '' }, 'v' } end
+    end
+    vim.g.clipboard = {
+      name = 'OSC 52 (devbox)',
+      copy = { ['+'] = copy '+', ['*'] = copy '*' },
+      paste = { ['+'] = paste '+', ['*'] = paste '*' },
+    }
+  end
+
   -- Sync clipboard between OS and Neovim.
   --  Schedule the setting after `UiEnter` because it can increase startup-time.
   --  Remove this option if you want your OS clipboard to remain independent.
